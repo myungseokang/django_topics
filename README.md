@@ -44,3 +44,20 @@ signals을 사용하면 좋은 경우는 해당 모델 외의 관계된 다른 �
 - 단점
     - 코드 흐름이 명확하지 않다.
     - 데코레이터를 사용하려면 추가 처리가 필요하다.
+
+
+### 3. User 모델 커스터마이징
+> 크게는 [customizing authentication](https://docs.djangoproject.com/en/2.0/topics/auth/customizing/) 이라는 주제로 공식 문서에서 다루고 있다.
+
+서비스를 하다보면 Django에서 기본으로 제공해주는 User 모델로는 서비스의 비즈니스 로직을 수행하기 어려운 부분이 있다.<br/>
+해서 Django를 쓰는 대부분의 기업에서는 User 모델을 커스터마이징 하고 있지 않을까 생각한다.<br/>
+이 방법은 크게 2가지로 나뉘는 걸로 알고 있다. (더 있다면 이슈로 알려주세요.)
+
+1. **Django의 User 모델과 1:1 관계를 가진 User 모델 만들기** ([공식 문서](https://docs.djangoproject.com/en/2.0/topics/auth/customizing/#extending-the-existing-user-model))
+2. **AbstractBaseUser 혹은 AbstractUser를 상속받는 User 모델 만들기** ([공식 문서](https://docs.djangoproject.com/en/2.0/topics/auth/customizing/#substituting-a-custom-user-model))
+
+2개의 경우가 각각 사용되는 경우가 다르다.<br/>
+자신이 사용하려는 목적에 맞는 방법을 선택하면 될 것 같지만, **굳이** 비교를 해보자면
+
+1번의 경우, 간단하고 적은 코드로 Django의 User 모델을 확장하여 사용할 수 있다.<br/>
+2번의 경우, `AbstractBaseUser` 모델을 상속한 User 커스텀 모델을 만들면 로그인 아이디로 이메일 주소를 사용하거나 Django 로그인 절차가 아닌 다른 인증 절차를 직접 구현할 수 있다.<br/>
