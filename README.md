@@ -61,3 +61,38 @@ signals을 사용하면 좋은 경우는 해당 모델 외의 관계된 다른 �
 
 1번의 경우, 간단하고 적은 코드로 Django의 User 모델을 확장하여 사용할 수 있다.<br/>
 2번의 경우, `AbstractBaseUser` 모델을 상속한 User 커스텀 모델을 만들면 로그인 아이디로 이메일 주소를 사용하거나 Django 로그인 절차가 아닌 다른 인증 절차를 직접 구현할 수 있다.<br/>
+
+### 4. QuerySet이 계산(evaluate)되는 경우
+
+> 공식 문서에서도 [When QuerySets are evaluated](https://docs.djangoproject.com/en/2.0/ref/models/querysets/#when-querysets-are-evaluated) 라는 이름으로 다루고 있다.
+
+내부적오르 QuerySet은 직접적으로 데이터베이스에 도달하지 않고, 웬만한 작업을 실행한다.<br/>
+QuerySet이 계산되기 전까지 실제로 데이터베이스에 접근하지 않는다.<br/>
+하지만 사용하다보면 QuerySet을 계산할 필요가 없는 부분에서도 계산돼서 데이터베이스에 접근을 여러 번 하게 되는 경우가 발생한다.<br/>
+실제로도 겪었었고, 그 때 QuerySet은 게으르게(lazy) 계산된다는 것을 알았다.<br/>
+그래서 QuerySet이 계산되는 경우를 정리해보고자 한다.<br/>
+
+아래는 QuerySet이 계산되는 경우이다.
+
+1. 반복 (Iteration): QuerySet은 반복 가능 (Iterable)하고, 처음 반복할 때 QuerySet이 계산된다.
+
+2. 슬라이싱 (Slicing): QuerySet도 Python의 리스트처럼 슬라이싱이 가능하다. 대부분의 경우에는 계산되지 않은 QuerySet을 슬라이싱하면 다른 계산되지 않은 QuerySet을 반환한다. 하지만 슬라이싱할 때 `step` 인자를 사용하게 되면 QuerySet이 게산된다. `step` 인자는 다음과 같이 사용된다.
+```
+>>> temp_list = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
+>>> temp_list[0:9:2]
+[1, 3, 5, 7, 9]
+```
+
+`temp_list[start:end:step]`의 경우 `start`부터 `end`까지 `step`만큼 증가시키면서 슬라이싱한다.
+
+공식 문서에도 다루고 있다 ([Limiting QuerySets](https://docs.djangoproject.com/en/2.0/topics/db/queries/#limiting-querysets)).
+
+3. 피클링 (Pickling) / 캐싱 (Caching)
+
+4. repr(): `repr()`를 호출할 떄도 계산된다. 이건 Python 인터프리터에서의 편의를 위해서 제공된다.
+
+5. len(): `len()`를 호출할 때도 계산된다. 만약 실제 인스턴스가 필요하지 않고 개수만 필요가 있다면 `len()`보다는 `count()`를 사용하는 게 훨씬 효율적이다.
+
+6. list(): `list()`를 호출해서 QuerySet을 강제로 계산할 수도 있다.
+
+7. bool(): `bool()`이나 `or`, `and` 혹은 `if`문과 같은 불리언 (Boolean) 컨텍스트에서 QuerySet을 사용하는 경우에도 평가된다. 결과가 하나 이상 있으면 `True`이고, 아니면 `False`이다. 만약 적어도 하나 이상의 결과가 있는지 확인하려는 것이라면 `exists()`를 사용하는 것이 더 효율적이다.
