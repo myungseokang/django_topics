@@ -66,7 +66,7 @@ signals을 사용하면 좋은 경우는 해당 모델 외의 관계된 다른 �
 
 > 공식 문서에서도 [When QuerySets are evaluated](https://docs.djangoproject.com/en/2.0/ref/models/querysets/#when-querysets-are-evaluated) 라는 이름으로 다루고 있다.
 
-내부적오르 QuerySet은 직접적으로 데이터베이스에 도달하지 않고, 웬만한 작업을 실행한다.<br/>
+내부적으로 QuerySet은 직접적으로 데이터베이스에 도달하지 않고, 웬만한 작업을 실행한다.<br/>
 QuerySet이 계산되기 전까지 실제로 데이터베이스에 접근하지 않는다.<br/>
 하지만 사용하다보면 QuerySet을 계산할 필요가 없는 부분에서도 계산돼서 데이터베이스에 접근을 여러 번 하게 되는 경우가 발생한다.<br/>
 실제로도 겪었었고, 그 때 QuerySet은 게으르게(lazy) 계산된다는 것을 알았다.<br/>
